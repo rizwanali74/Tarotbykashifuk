@@ -33,12 +33,12 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Main Grid: Left copy, Right visual */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
+
           {/* Left Column: Headlines & Call to Action */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -52,7 +52,7 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
 
             {/* Main Headline */}
             <h1 className="font-cinzel text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.15]">
-              Illuminate Your Path With <br />
+              Find Your Path With <br />
               <span className="text-gradient-orange">Sacred Wisdom</span> & Clarity
             </h1>
 
@@ -64,8 +64,8 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
             {/* Key Service Highlights Pills */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
               {['Love & Twin Flame Focus', 'Authentic Vedic Charts', 'Phone Number Numerology', 'Spiritual Cleansing'].map((item) => (
-                <span 
-                  key={item} 
+                <span
+                  key={item}
                   className="px-3 py-1 text-xs rounded-full bg-[#111625] border border-orange-500/20 text-orange-200/90 flex items-center gap-1.5"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
@@ -140,7 +140,7 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
           </motion.div>
 
           {/* Right Column: Hero Visual Showcase */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, delay: 0.2 }}
@@ -150,12 +150,12 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
             <div className="absolute -inset-4 bg-gradient-to-tr from-orange-600/30 via-amber-500/20 to-purple-600/20 rounded-3xl blur-2xl" />
 
             <div className="relative rounded-2xl overflow-hidden border border-orange-500/30 bg-[#0d1220]/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-md p-3 sm:p-4">
-              
+
               {/* Image banner with velvet tarot setup */}
               <div className="relative h-64 sm:h-72 rounded-xl overflow-hidden group">
-                <img 
-                  src="/images/hero.jpg" 
-                  alt="Kashif Mystical Tarot Reading" 
+                <img
+                  src="/images/hero.jpg"
+                  alt="Kashif Mystical Tarot Reading"
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d1220] via-transparent to-black/30" />
@@ -189,11 +189,10 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
                     <button
                       key={card.name}
                       onClick={() => setActiveCardIndex(idx)}
-                      className={`p-2.5 rounded-lg text-left transition-all duration-200 border ${
-                        activeCardIndex === idx 
-                          ? 'bg-orange-500/15 border-orange-500 text-white shadow-[0_0_12px_rgba(249,115,22,0.3)]' 
+                      className={`p-2.5 rounded-lg text-left transition-all duration-200 border ${activeCardIndex === idx
+                          ? 'bg-orange-500/15 border-orange-500 text-white shadow-[0_0_12px_rgba(249,115,22,0.3)]'
                           : 'bg-[#121727] border-white/5 text-slate-400 hover:border-orange-500/30 hover:text-slate-200'
-                      }`}
+                        }`}
                     >
                       <div className="text-xl mb-1">{card.symbol}</div>
                       <div className="text-xs font-bold text-white truncate">{card.name}</div>
@@ -203,7 +202,7 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
                 </div>
 
                 {/* Card Interpretation Highlight */}
-                <motion.div 
+                <motion.div
                   key={activeCardIndex}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
