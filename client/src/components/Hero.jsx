@@ -190,8 +190,8 @@ export default function Hero({ onExploreServices, onSelectPackage, onOpenCart })
                       key={card.name}
                       onClick={() => setActiveCardIndex(idx)}
                       className={`p-2.5 rounded-lg text-left transition-all duration-200 border ${activeCardIndex === idx
-                          ? 'bg-orange-500/15 border-orange-500 text-white shadow-[0_0_12px_rgba(249,115,22,0.3)]'
-                          : 'bg-[#121727] border-white/5 text-slate-400 hover:border-orange-500/30 hover:text-slate-200'
+                        ? 'bg-orange-500/15 border-orange-500 text-white shadow-[0_0_12px_rgba(249,115,22,0.3)]'
+                        : 'bg-[#121727] border-white/5 text-slate-400 hover:border-orange-500/30 hover:text-slate-200'
                         }`}
                     >
                       <div className="text-xl mb-1">{card.symbol}</div>
