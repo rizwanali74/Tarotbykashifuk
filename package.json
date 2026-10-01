@@ -1,0 +1,14 @@
+{
+  "name": "tarot-with-kashif",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tarot By Kashif - Astro & Numerology Sanctuary Full-Stack Application",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "server": "npm --prefix server start",
+    "server:dev": "npm --prefix server run dev",
+    "test:security": "npm --prefix server test",
+    "build": "npm --prefix client run build",
+    "preview": "npm --prefix client run preview"
+  }
+}

@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+:root {
+  /* Core Color Variables requested by user */
+  --bg-dark: #07090e;
+  --bg-surface: #0c0f18;
+  --bg-card: rgba(15, 19, 31, 0.75);
+  --bg-card-hover: rgba(23, 29, 48, 0.85);
+  --bg-glass: rgba(12, 16, 26, 0.65);
+  --bg-glass-border: rgba(249, 115, 22, 0.22);
+
+  /* Primary Orange Glow & Accents */
+  --primary: #f97316;          /* Rich spiritual amber orange */
+  --primary-light: #fb923c;    /* Warm radiant orange */
+  --primary-dark: #ea580c;     /* Deep sunset orange */
+  --primary-glow: rgba(249, 115, 22, 0.35);
+  --primary-subtle: rgba(249, 115, 22, 0.12);
+
+  /* Secondary Mystic Gold & Celestial Violet */
+  --secondary: #eab308;        /* Cosmic golden amber */
+  --secondary-glow: rgba(234, 179, 8, 0.3);
+  --mystic-violet: #a855f7;    /* Intuitive astral purple */
+  --mystic-cyan: #38bdf8;      /* Starlight cyan */
+
+  /* Typography Colors */
+  --text-main: #fcfcfd;        /* Pristine luminous white */
+  --text-primary: #f8fafc;
+  --text-orange: #ff8a3d;      /* Highlight orange font */
+  --text-secondary: #fed7aa;   /* Soft warm apricot */
+  --text-muted: #94a3b8;       /* Celestial muted slate */
+
+  /* Borders & Shadows */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-orange: rgba(249, 115, 22, 0.3);
+  --glow-orange-box: 0 0 30px rgba(249, 115, 22, 0.22);
+  --glow-gold-box: 0 0 35px rgba(234, 179, 8, 0.2);
+
+  /* Typography stack */
+  --font-serif: 'Cinzel', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Mystical Font Utilities */
+.font-cinzel {
+  font-family: var(--font-serif);
+}
+
+.font-jakarta {
+  font-family: var(--font-sans);
+}
+
+/* Cosmic Glowing Backgrounds & Gradients */
+.bg-cosmic-gradient {
+  background: radial-gradient(circle at 50% 20%, rgba(249, 115, 22, 0.12) 0%, rgba(12, 16, 26, 0.95) 50%, var(--bg-dark) 100%);
+}
+
+.text-gradient-orange {
+  background: linear-gradient(135deg, #ffffff 0%, #fed7aa 35%, #f97316 75%, #ea580c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #fffbeb 0%, #fde68a 40%, #eab308 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glow-orange {
+  box-shadow: 0 0 25px -3px rgba(249, 115, 22, 0.35), 0 0 10px -2px rgba(249, 115, 22, 0.2);
+}
+
+.glow-orange-sm {
+  box-shadow: 0 0 15px -2px rgba(249, 115, 22, 0.3);
+}
+
+.glow-gold {
+  box-shadow: 0 0 25px -3px rgba(234, 179, 8, 0.35);
+}
+
+.border-glow-orange {
+  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 0 15px rgba(249, 115, 22, 0.15);
+}
+
+/* Glassmorphism Styles */
+.glass-panel {
+  background: rgba(14, 18, 30, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  background: rgba(22, 28, 46, 0.85);
+  border-color: rgba(249, 115, 22, 0.4);
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.6), 0 0 25px rgba(249, 115, 22, 0.2);
+}
+
+/* Animated Celestial Stars & Pulsing Nebulas */
+@keyframes celestial-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+.animate-float {
+  animation: celestial-float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(1.08);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 8s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 60s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-badge {
+  background: linear-gradient(90deg, rgba(249,115,22,0.15) 0%, rgba(249,115,22,0.4) 50%, rgba(249,115,22,0.15) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 4s infinite linear;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #07090e;
+}
+::-webkit-scrollbar-thumb {
+  background: #272f44;
+  border-radius: 4px;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
