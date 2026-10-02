@@ -12,6 +12,7 @@ import ContactSection from '../components/ContactSection';
 import FAQSection from '../components/FAQSection';
 import Footer from '../components/Footer';
 import { ShoppingBag, MessageSquare, Sparkles } from 'lucide-react';
+import { fetchPublicCatalog } from '../services/api';
 
 export default function ClientHome() {
   // Cart / Selection State
@@ -36,9 +37,23 @@ export default function ClientHome() {
 
   // Modals & Drawers
   const [selectedService, setSelectedService] = useState(null);
+  const [catalog, setCatalog] = useState({ services: [], categories: [] });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchPublicCatalog()
+      .then((result) => {
+        if (isMounted && result.success) {
+          setCatalog({ services: result.services, categories: result.categories });
+        }
+      })
+      .catch((error) => console.error('Failed to load service catalog:', error));
+
+    return () => { isMounted = false; };
+  }, []);
 
   // Sync cart to localStorage
   useEffect(() => {
@@ -125,6 +140,8 @@ export default function ClientHome() {
 
         {/* Services Catalog */}
         <ServicesSection 
+          services={catalog.services}
+          categories={catalog.categories}
           onOpenServiceModal={(svc) => setSelectedService(svc)}
           onAddToCart={handleAddToCart}
           isItemInCart={isItemInCart}
@@ -137,13 +154,14 @@ export default function ClientHome() {
         />
 
         {/* Contact Us Form */}
-        <ContactSection />
+        <ContactSection services={catalog.services} />
 
         {/* FAQ Accordion */}
         <FAQSection />
 
         {/* Footer */}
         <Footer 
+          services={catalog.services}
           onOpenOrders={() => setIsTrackerOpen(true)}
         />
 

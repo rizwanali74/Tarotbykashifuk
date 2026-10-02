@@ -8,6 +8,8 @@ import authRoutes from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import catalogRoutes from './routes/catalogRoutes.js';
+import { uploadDirectory } from './config/uploads.js';
 
 dotenv.config();
 
@@ -23,6 +25,8 @@ app.use(helmet({
 // 2. CORS Configuration
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5175',
+
   'http://127.0.0.1:5173',
   process.env.CLIENT_URL,
 ].filter(Boolean);
@@ -44,6 +48,7 @@ app.use(cors({
 // 3. Body Parsing with Strict Payload Size Limits (Mitigates Memory Denial-of-Service)
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use('/uploads', express.static(uploadDirectory, { dotfiles: 'deny', index: false }));
 
 // 4. Input Sanitization against Script Injection & NoSQL Operators
 app.use(sanitizeInput);
@@ -72,6 +77,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/catalog', catalogRoutes);
 
 // 7. 404 Route Handler
 app.use((req, res) => {

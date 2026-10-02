@@ -1,16 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Search, Check, ShoppingBag, Eye, Heart, Compass, Shield, Flame } from 'lucide-react';
-import { siteData } from '../data';
+import { resolveCatalogImageUrl } from '../services/api';
 
-export default function ServicesSection({ onOpenServiceModal, onAddToCart, isItemInCart }) {
+export default function ServicesSection({ services = [], categories = [], onOpenServiceModal, onAddToCart, isItemInCart }) {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categories = ['All', 'Readings', 'Relationships', 'Spiritual care'];
+  const categoryNames = ['All', ...categories.map((category) => category.name)];
 
   const filteredServices = useMemo(() => {
-    return siteData.services.filter((service) => {
+    return services.filter((service) => {
       const matchesCategory = 
         activeCategory === 'All' || 
         service.category.toLowerCase() === activeCategory.toLowerCase();
@@ -18,11 +18,11 @@ export default function ServicesSection({ onOpenServiceModal, onAddToCart, isIte
       const matchesSearch = 
         service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         service.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+        (service.tags || []).some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, searchQuery]);
+  }, [services, activeCategory, searchQuery]);
 
   return (
     <section id="services" className="py-20 md:py-28 relative">
@@ -38,7 +38,7 @@ export default function ServicesSection({ onOpenServiceModal, onAddToCart, isIte
             Tarot, Astrology & Energetic Sanctuary
           </h2>
           <p className="text-slate-300 text-base sm:text-lg font-jakarta">
-            Explore 9 tailored spiritual sessions designed to bring peace, perspective, and empowerment to your journey.
+            Explore {services.length} tailored spiritual sessions designed to bring peace, perspective, and empowerment to your journey.
           </p>
         </div>
 
@@ -47,10 +47,10 @@ export default function ServicesSection({ onOpenServiceModal, onAddToCart, isIte
           
           {/* Category Tabs */}
           <div className="flex flex-wrap items-center justify-center gap-2 w-full md:w-auto">
-            {categories.map((category) => {
+            {categoryNames.map((category) => {
               const count = category === 'All' 
-                ? siteData.services.length 
-                : siteData.services.filter(s => s.category.toLowerCase() === category.toLowerCase()).length;
+                ? services.length
+                : services.filter(s => s.category.toLowerCase() === category.toLowerCase()).length;
               
               const isActive = activeCategory === category;
               return (
@@ -124,7 +124,7 @@ export default function ServicesSection({ onOpenServiceModal, onAddToCart, isIte
                   {/* Image Header */}
                   <div className="relative h-48 w-full overflow-hidden bg-[#11172a]">
                     <img 
-                      src={service.image || '/images/hero.jpg'} 
+                      src={resolveCatalogImageUrl(service.image) || '/images/hero.jpg'}
                       alt={service.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -167,7 +167,7 @@ export default function ServicesSection({ onOpenServiceModal, onAddToCart, isIte
 
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1.5 pt-1">
-                      {service.tags.map((tag) => (
+                        {(service.tags || []).map((tag) => (
                         <span 
                           key={tag} 
                           className="px-2 py-0.5 rounded bg-[#13192d] text-orange-200/80 text-[11px] font-medium border border-white/5"

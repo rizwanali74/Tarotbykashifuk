@@ -2,7 +2,7 @@ import React from 'react';
 import { Sparkles, Heart, Shield, MessageSquare, Mail, Compass, ArrowUp } from 'lucide-react';
 import { siteData } from '../data';
 
-export default function Footer({ onOpenOrders }) {
+export default function Footer({ services = [], onOpenOrders }) {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -53,10 +53,13 @@ export default function Footer({ onOpenOrders }) {
               Spiritual Services
             </h4>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li><a href="#services" className="hover:text-orange-400 transition-colors">Tarot Card Reading (£65)</a></li>
-              <li><a href="#services" className="hover:text-orange-400 transition-colors">Vedic Birth Chart (£75)</a></li>
-              <li><a href="#services" className="hover:text-orange-400 transition-colors">Phone Number Numerology (£50)</a></li>
-              <li><a href="#services" className="hover:text-orange-400 transition-colors">Chakra Healing Session (£100)</a></li>
+              {services.map((service) => (
+                <li key={service.id}>
+                  <a href="#services" className="hover:text-orange-400 transition-colors">
+                    {service.name} ({service.price})
+                  </a>
+                </li>
+              ))}
               <li><a href="#packages" className="hover:text-orange-400 transition-colors">Complete Package (£169)</a></li>
             </ul>
           </div>

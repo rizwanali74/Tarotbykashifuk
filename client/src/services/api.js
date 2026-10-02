@@ -1,4 +1,14 @@
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+
+export const resolveCatalogImageUrl = (imagePath) => {
+  if (!imagePath || /^(https?:)?\/\//i.test(imagePath)) return imagePath;
+  try {
+    const apiOrigin = new URL(API_BASE, window.location.origin).origin;
+    return new URL(imagePath, apiOrigin).toString();
+  } catch {
+    return imagePath;
+  }
+};
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('kashif_admin_token');
@@ -86,7 +96,47 @@ export const fetchMonthlyStats = async () => {
   return await res.json();
 };
 
-// 3. Contact Form & Email
+// 3. Public Service Catalog & Superadmin Management
+export const fetchPublicCatalog = async () => {
+  const res = await fetch(`${API_BASE}/catalog`);
+  return await res.json();
+};
+
+export const fetchAdminCatalog = async () => {
+  const res = await fetch(`${API_BASE}/catalog/admin`, {
+    headers: getAuthHeaders(),
+  });
+  return await res.json();
+};
+
+const adminCatalogRequest = async (path, method = 'POST', payload) => {
+  const res = await fetch(`${API_BASE}/catalog/admin${path}`, {
+    method,
+    headers: getAuthHeaders(),
+    ...(payload ? { body: JSON.stringify(payload) } : {}),
+  });
+  return await res.json();
+};
+
+export const createCatalogService = (service) => adminCatalogRequest('/services', 'POST', service);
+export const updateCatalogService = (id, service) => adminCatalogRequest(`/services/${id}`, 'PATCH', service);
+export const deleteCatalogService = (id) => adminCatalogRequest(`/services/${id}`, 'DELETE');
+export const uploadCatalogServiceImage = async (file) => {
+  const formData = new FormData();
+  formData.append('image', file);
+  const token = localStorage.getItem('kashif_admin_token');
+  const res = await fetch(`${API_BASE}/catalog/admin/services/image`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  return await res.json();
+};
+export const createCatalogCategory = (name) => adminCatalogRequest('/categories', 'POST', { name });
+export const updateCatalogCategory = (id, name) => adminCatalogRequest(`/categories/${id}`, 'PATCH', { name });
+export const deleteCatalogCategory = (id) => adminCatalogRequest(`/categories/${id}`, 'DELETE');
+
+// 4. Contact Form & Email
 export const submitContactInquiry = async (formData) => {
   const res = await fetch(`${API_BASE}/contact`, {
     method: 'POST',
@@ -112,7 +162,7 @@ export const sendDiagnosticEmail = async (email) => {
   return await res.json();
 };
 
-// 4. PayPal Payment
+// 5. PayPal Payment
 export const initiatePayPalPayment = async (orderId, amount) => {
   const res = await fetch(`${API_BASE}/payments/create-order`, {
     method: 'POST',

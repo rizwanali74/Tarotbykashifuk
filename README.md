@@ -59,7 +59,15 @@ npm run dev
 
 ---
 
-## ⚙️ Environment Configuration (`server/.env`)
+## ⚙️ Environment Configuration
+
+The client reads `VITE_API_BASE_URL` from `client/.env`. Use `/api` for local development; Vite proxies it to the backend on port 5000. Set it to your deployed API base URL when hosting the client separately.
+
+The backend reads its settings from `server/.env`. `MONGODB_URI` can point to a local MongoDB instance or your MongoDB Atlas connection string. Do not commit `.env` files or share their secrets.
+
+Both folders include `.env.example` templates. Copy them to `.env` and fill in your own credentials before running the app.
+
+Run `npm run seed:catalog --prefix server` to insert the original services and categories into MongoDB. The seed only inserts missing records, so it can be rerun without overwriting catalog edits. Service images are stored under `server/uploads`; set `SERVICE_UPLOAD_DIR` to a persistent writable directory when deploying the backend.
 
 ```env
 PORT=5000

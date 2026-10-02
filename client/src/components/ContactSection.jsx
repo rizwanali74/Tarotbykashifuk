@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Sparkles, CheckCircle2
 import { siteData } from '../data';
 import { submitContactInquiry } from '../services/api';
 
-export default function ContactSection() {
+export default function ContactSection({ services = [] }) {
   const { contact } = siteData;
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -224,17 +224,12 @@ export default function ContactSection() {
                         onChange={(e) => setFormData({ ...formData, serviceInterest: e.target.value })}
                         className="w-full px-3.5 py-2.5 bg-[#070a12] border border-orange-500/20 rounded-xl text-xs sm:text-sm text-white focus:border-orange-500 outline-none"
                       >
-                        <option>Tarot Card Reading (£65)</option>
-                        <option>Complete Guidance Package (£169)</option>
-                        <option>Love & Twin Flame Suite (£115)</option>
-                        <option>Numerology Reading (£50)</option>
-                        <option>Phone Number Numerology (£50)</option>
-                        <option>Telepathy Reading (£60)</option>
-                        <option>Birth Chart / Natal Chart Reading (£75)</option>
-                        <option>Chakra Healing Session (£100)</option>
-                        <option>Gemstone Guidance & Remedies (£55)</option>
-                        <option>Love Spells (Case-based quote)</option>
-                        <option>Black Magic Removal (Case-based quote)</option>
+                        {services.map((service) => (
+                          <option key={service.id}>{service.name} ({service.price})</option>
+                        ))}
+                        {siteData.packages.map((pkg) => (
+                          <option key={pkg.id}>{pkg.name} ({pkg.price})</option>
+                        ))}
                         <option>General Spiritual Enquiry</option>
                       </select>
                     </div>

@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
-  ShieldCheck, LogOut, ExternalLink, RefreshCw, BarChart3, 
+  ShieldCheck, LogOut, ExternalLink, RefreshCw, ClipboardList, Layers3, Settings2, LayoutDashboard,
   DollarSign, Clock, CheckCircle2, Mail, Search, Eye, 
   X, MessageSquare, Phone, Send, Filter, Check, AlertCircle 
 } from 'lucide-react';
 import { 
   getAdminProfile, fetchAdminOrders, updateOrderStatus, 
-  fetchMonthlyStats, fetchContactMessages, sendDiagnosticEmail 
+  fetchMonthlyStats, fetchContactMessages, fetchAdminCatalog, sendDiagnosticEmail
 } from '../../services/api';
 import CelestialBackground from '../../components/CelestialBackground';
+import AdminCatalog from './AdminCatalog';
+
+const AdminHomeCharts = lazy(() => import('./AdminDashboardCharts'));
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -17,10 +20,11 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [catalog, setCatalog] = useState({ services: [], categories: [] });
   const [loading, setLoading] = useState(true);
 
   // Filter & Search
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'messages', 'system'
+  const [activeTab, setActiveTab] = useState('home');
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -29,17 +33,19 @@ export default function AdminDashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [profileRes, statsRes, ordersRes, messagesRes] = await Promise.all([
+      const [profileRes, statsRes, ordersRes, messagesRes, catalogRes] = await Promise.all([
         getAdminProfile(),
         fetchMonthlyStats(),
         fetchAdminOrders(),
         fetchContactMessages(),
+        fetchAdminCatalog(),
       ]);
 
       if (profileRes.success) setAdminUser(profileRes.admin);
       if (statsRes.success) setStats(statsRes.stats);
       if (ordersRes.success) setOrders(ordersRes.orders);
       if (messagesRes.success) setMessages(messagesRes.messages);
+      if (catalogRes.success) setCatalog({ services: catalogRes.services, categories: catalogRes.categories });
     } catch (err) {
       console.error('Error loading admin sanctuary data:', err);
     } finally {
@@ -97,61 +103,79 @@ export default function AdminDashboard() {
     return matchesFilter && matchesSearch;
   });
 
+  const navigationItems = [
+    { id: 'home', label: 'Home Dashboard', icon: LayoutDashboard },
+    { id: 'orders', label: 'Bookings & Orders', count: orders.length, icon: ClipboardList },
+    { id: 'messages', label: 'Client Inquiries', count: messages.length, icon: Mail },
+    { id: 'catalog', label: 'Services & Categories', icon: Layers3 },
+    { id: 'system', label: 'System & Email', icon: Settings2 },
+  ];
+  const activePage = navigationItems.find((item) => item.id === activeTab);
+
   return (
     <div className="relative min-h-screen bg-[#07090e] text-white flex flex-col">
       <CelestialBackground />
 
-      <div className="relative z-10 flex-1 flex flex-col max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 text-left">
-        
-        {/* Top Header */}
-        <header className="p-4 sm:p-5 rounded-2xl bg-[#0d1222]/90 border border-orange-500/30 backdrop-blur-xl shadow-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-1 flex-col text-left lg:pl-64 lg:flex-row">
+        <aside style={{ left: 'max(0px, calc((100vw - 1600px) / 2))' }} className="border-b border-white/10 bg-[#0b0f19]/95 p-4 backdrop-blur-xl lg:fixed lg:inset-y-0 lg:z-30 lg:flex lg:h-screen lg:w-64 lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:border-white/10 lg:p-5">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-white p-0.5 border-2 border-orange-400 overflow-hidden shadow-md">
-              <img src="/images/logo.jpg" alt="Logo" className="w-full h-full object-contain" />
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-orange-400 bg-white p-0.5">
+              <img src="/images/logo.jpg" alt="Tarot By Kashif" className="h-full w-full object-contain" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-cinzel text-lg sm:text-xl font-bold text-white tracking-wider">
-                  KASHIF SANCTUARY PORTAL
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300 font-mono font-bold">
-                  SUPERADMIN
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Logged in as: <strong className="text-orange-400">{adminUser?.username || 'Superadmin'}</strong> ({adminUser?.email})
-              </p>
+            <div className="min-w-0">
+              <div className="truncate font-cinzel text-sm font-bold text-white">TAROT BY KASHIF</div>
+              <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-orange-300">Superadmin Portal</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <Link
-              to="/"
-              target="_blank"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-[#141b2e] hover:bg-[#1a233b] border border-white/10 transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>Public Website</span>
+          <div className="mt-5 hidden rounded-lg border border-white/10 bg-white/[0.03] p-3 lg:block">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Signed in as</div>
+            <div className="mt-1 truncate text-sm font-semibold text-white">{adminUser?.username || 'Superadmin'}</div>
+            <div className="truncate text-xs text-slate-400">{adminUser?.email}</div>
+          </div>
+
+          <nav aria-label="Admin sections" className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:flex lg:flex-col">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`flex min-h-10 items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold transition-colors ${isActive ? 'bg-orange-500/15 text-orange-200 ring-1 ring-inset ring-orange-500/30' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                >
+                  <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-orange-300' : ''}`} />
+                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  {item.count !== undefined && <span className="text-[10px] text-slate-500">{item.count}</span>}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="mt-4 flex gap-2 lg:mt-auto lg:flex-col lg:pt-8">
+            <Link to="/" target="_blank" className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-white/[0.07] hover:text-white lg:justify-start">
+              <ExternalLink className="h-4 w-4" /> Public Website
             </Link>
-
-            <button
-              onClick={loadData}
-              className="p-2 rounded-xl bg-[#141b2e] hover:bg-[#1a233b] text-slate-300 hover:text-white border border-white/10"
-              title="Refresh Data"
-            >
-              <RefreshCw className="w-4 h-4 text-orange-400" />
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-white bg-rose-950/30 hover:bg-rose-900 border border-rose-500/30 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
+            <button type="button" onClick={handleLogout} className="inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg border border-rose-500/20 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/10 lg:justify-start">
+              <LogOut className="h-4 w-4" /> Sign Out
             </button>
           </div>
-        </header>
+        </aside>
 
+        <main className="min-w-0 flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
+          <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+            <div>
+              <h1 className="font-cinzel text-xl font-bold text-white sm:text-2xl">{activePage?.label || 'Admin Dashboard'}</h1>
+              <p className="mt-1 text-xs text-slate-400">Manage bookings, client messages, and your public service catalog.</p>
+            </div>
+            <button type="button" onClick={loadData} title="Refresh dashboard data" aria-label="Refresh dashboard data" className="inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-semibold text-slate-300 hover:bg-white/[0.07] hover:text-white">
+              <RefreshCw className="h-4 w-4 text-orange-300" /> Refresh
+            </button>
+          </header>
+
+        {activeTab === 'home' && <>
         {/* Live Monthly Stats */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
           <div className="p-4 rounded-2xl bg-[#0c101d]/90 border border-orange-500/20 backdrop-blur-md">
@@ -198,36 +222,10 @@ export default function AdminDashboard() {
             <div className="text-[10px] text-orange-300 mt-1">Contact form messages</div>
           </div>
         </section>
-
-        {/* Tab Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
-          <div className="flex rounded-xl bg-[#0d1222] p-1 border border-white/10">
-            <button
-              onClick={() => setActiveTab('orders')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'orders' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Readings & Orders ({orders.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('messages')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'messages' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Client Inquiries ({messages.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('system')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'system' ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              System & Email Test
-            </button>
-          </div>
-        </div>
+        <Suspense fallback={<div className="rounded-xl border border-white/10 bg-[#0c101d]/90 p-6 text-sm text-slate-400">Loading dashboard charts...</div>}>
+          <AdminHomeCharts orders={orders} catalog={catalog} />
+        </Suspense>
+        </>}
 
         {/* TAB 1: ORDERS & READINGS */}
         {activeTab === 'orders' && (
@@ -414,6 +412,9 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {activeTab === 'catalog' && <AdminCatalog />}
+
+        </main>
       </div>
 
       {/* Order Inspection Modal */}

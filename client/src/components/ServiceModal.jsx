@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Sparkles, Clock, AlertCircle, Calendar, ArrowRight, ShieldAlert, ShoppingBag } from 'lucide-react';
+import { resolveCatalogImageUrl } from '../services/api';
 
 export default function ServiceModal({ service, isOpen, onClose, onAddToCart, isItemInCart }) {
   if (!isOpen || !service) return null;
@@ -30,7 +31,7 @@ export default function ServiceModal({ service, isOpen, onClose, onAddToCart, is
           {/* Top Banner Image with Gradient */}
           <div className="relative h-48 sm:h-56 w-full overflow-hidden">
             <img 
-              src={service.image || '/images/hero.jpg'} 
+              src={resolveCatalogImageUrl(service.image) || '/images/hero.jpg'}
               alt={service.name} 
               className="w-full h-full object-cover"
             />
