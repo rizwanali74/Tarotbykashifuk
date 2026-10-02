@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { siteData } from '../../../client/src/data.js';
+import { siteData } from '../../client/src/data.js';
 import { connectDB } from '../config/db.js';
 import { Category } from '../models/Category.js';
 import { Service } from '../models/Service.js';
