@@ -6,9 +6,32 @@ import { protectAdmin } from '../middleware/authMiddleware.js';
 import { isValidRasterImage, uploadServiceImage } from '../middleware/serviceImageUpload.js';
 import { Category } from '../models/Category.js';
 import { Service } from '../models/Service.js';
+import { connectDB } from '../config/db.js';
+import { seedDefaultCatalog } from '../services/catalogSeedService.js';
 
 const router = express.Router();
 const categoryKey = (name) => name.trim().toLocaleLowerCase();
+
+router.get('/seed-defaults', async (req, res) => {
+  try {
+    const connected = await connectDB();
+    if (!connected) {
+      return res.status(503).json({ success: false, error: 'MongoDB is unavailable; default services were not created.' });
+    }
+
+    const result = await seedDefaultCatalog();
+    return res.status(result.alreadyCreated ? 200 : 201).json({
+      success: true,
+      message: result.alreadyCreated
+        ? 'Default services are already created.'
+        : 'Default services created successfully.',
+      ...result,
+    });
+  } catch (error) {
+    console.error('Default catalog seed failed:', error);
+    return res.status(500).json({ success: false, error: 'Could not create default services.' });
+  }
+});
 
 router.post('/admin/services/image', protectAdmin, (req, res, next) => {
   uploadServiceImage.single('image')(req, res, (error) => {
