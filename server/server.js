@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { connectDB, getDBStatus } from './config/db.js';
 import { sanitizeInput } from './middleware/validator.js';
 import authRoutes from './routes/authRoutes.js';
@@ -108,9 +110,11 @@ const startServer = async () => {
   });
 };
 
-startServer().catch(err => {
-  console.error('Fatal Server Boot Error:', err);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  startServer().catch(err => {
+    console.error('Fatal Server Boot Error:', err);
+    process.exit(1);
+  });
+}
 
 export default app;
