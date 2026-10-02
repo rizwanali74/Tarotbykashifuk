@@ -1,4 +1,12 @@
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL;
+const defaultApiBase = import.meta.env.PROD
+  ? 'https://tarotbykashifuk-xv6m.vercel.app/api'
+  : '/api';
+const API_BASE = (
+  import.meta.env.PROD && configuredApiBase === '/api'
+    ? defaultApiBase
+    : configuredApiBase || defaultApiBase
+).replace(/\/$/, '');
 
 export const resolveCatalogImageUrl = (imagePath) => {
   if (!imagePath || /^(https?:)?\/\//i.test(imagePath)) return imagePath;
