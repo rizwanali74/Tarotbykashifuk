@@ -17,14 +17,14 @@ export default function FAQSection() {
         
         {/* Section Header */}
         <div className="text-center mb-14 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-semibold uppercase tracking-widest">
-            <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-500 text-xs font-semibold uppercase tracking-widest">
+            <HelpCircle className="w-3.5 h-3.5 text-amber-500" />
             <span>Common Enquiries</span>
           </div>
-          <h2 className="font-cinzel text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
+          <h2 className="font-cinzel text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--theme-text-heading)]">
             Frequently Asked Questions
           </h2>
-          <p className="text-slate-300 text-base sm:text-lg font-jakarta">
+          <p className="text-[var(--theme-text-secondary)] text-base sm:text-lg font-jakarta">
             Clear, transparent answers about sessions, payment arrangements, birth details, and ethics.
           </p>
         </div>
@@ -39,20 +39,20 @@ export default function FAQSection() {
                 key={idx}
                 className={`rounded-2xl transition-all duration-300 border ${
                   isOpen 
-                    ? 'bg-[#0f1426] border-orange-500/40 shadow-[0_4px_25px_rgba(249,115,22,0.1)]' 
-                    : 'bg-[#0b0e1a] border-white/10 hover:border-orange-500/20'
+                    ? 'bg-[var(--theme-bg-card)] border-orange-500/50 shadow-md' 
+                    : 'bg-[var(--theme-bg-card-subtle)] border-[var(--theme-border-subtle)] hover:border-orange-500/30'
                 }`}
               >
                 <button
                   onClick={() => toggleAccordion(idx)}
-                  className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left focus:outline-none"
+                  className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left focus:outline-none cursor-pointer"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-cinzel text-base sm:text-lg font-semibold text-white">
+                  <span className="font-cinzel text-base sm:text-lg font-semibold text-[var(--theme-text-heading)]">
                     {faq.question}
                   </span>
                   <div className={`p-1.5 rounded-full transition-transform duration-300 ${
-                    isOpen ? 'rotate-180 bg-orange-500/20 text-orange-400' : 'bg-white/5 text-slate-400'
+                    isOpen ? 'rotate-180 bg-orange-500/20 text-orange-500' : 'bg-orange-500/5 text-[var(--theme-text-muted)]'
                   }`}>
                     <ChevronDown className="w-4 h-4" />
                   </div>
@@ -67,7 +67,7 @@ export default function FAQSection() {
                       transition={{ duration: 0.25 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-300 leading-relaxed font-jakarta border-t border-white/5">
+                      <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[var(--theme-text-secondary)] leading-relaxed font-jakarta border-t border-[var(--theme-border-subtle)]">
                         {faq.answer}
                       </div>
                     </motion.div>
@@ -79,14 +79,14 @@ export default function FAQSection() {
         </div>
 
         {/* Bottom prompt */}
-        <div className="mt-10 p-5 rounded-2xl bg-gradient-to-r from-[#0d1222] via-[#141b30] to-[#0d1222] border border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-left">
+        <div className="mt-10 p-5 rounded-2xl bg-[var(--theme-bg-card-subtle)] border border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-left shadow-sm transition-colors">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/30 shrink-0">
+            <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 border border-orange-500/30 shrink-0">
               <MessageCircle className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-sm font-semibold text-white">Have a specific question not covered here?</div>
-              <div className="text-xs text-slate-400">Kashif is happy to clarify any session details before you book.</div>
+              <div className="text-sm font-semibold text-[var(--theme-text-heading)]">Have a specific question not covered here?</div>
+              <div className="text-xs text-[var(--theme-text-muted)]">Kashif is happy to clarify any session details before you book.</div>
             </div>
           </div>
 
@@ -94,7 +94,7 @@ export default function FAQSection() {
             href="https://wa.me/447400000000"
             target="_blank"
             rel="noreferrer"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-500 transition-colors whitespace-nowrap text-center"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-emerald-600 hover:bg-emerald-500 transition-colors whitespace-nowrap text-center cursor-pointer shadow-sm"
           >
             Chat with Kashif
           </a>

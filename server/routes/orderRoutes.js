@@ -1,5 +1,7 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import { Order } from '../models/Order.js';
+import { TimeSlot } from '../models/TimeSlot.js';
 import { protectAdmin } from '../middleware/authMiddleware.js';
 import { formSubmissionLimiter } from '../middleware/rateLimiter.js';
 import { isValidEmail } from '../middleware/validator.js';
@@ -52,6 +54,32 @@ router.post('/', formSubmissionLimiter, async (req, res) => {
       paymentStatus: 'Awaiting PayPal Confirmation',
       details: details || {},
     });
+
+    // Reserve selected slot in TimeSlot schema if provided
+    const slotIdentifier = details?.selectedSlot?.slotId || details?.selectedSlot?._id || details?.slotId || req.body.slotId;
+    if (slotIdentifier) {
+      try {
+        const isObjectId = mongoose.Types.ObjectId.isValid(slotIdentifier) && String(new mongoose.Types.ObjectId(slotIdentifier)) === String(slotIdentifier);
+        const filter = isObjectId ? { _id: slotIdentifier } : { slotId: slotIdentifier };
+        
+        await TimeSlot.findOneAndUpdate(filter, {
+          status: 'booked',
+          bookedCount: 1,
+          bookingInfo: {
+            clientName: clientName.trim(),
+            email: email.trim().toLowerCase(),
+            phone: phone.trim(),
+            orderId,
+            serviceName: Array.isArray(services) ? services.map(s => typeof s === 'string' ? s : (s?.name || '')).join(', ') : String(services),
+            clientCountry: details?.selectedSlot?.clientCountry || '',
+            clientTimezone: details?.selectedSlot?.clientTimezone || details?.clientTimezone || '',
+            clientConvertedTime: details?.selectedSlot?.clientLocalTime || '',
+          },
+        });
+      } catch (slotErr) {
+        console.error('Failed to reserve time slot:', slotErr);
+      }
+    }
 
     // Dispatch emails asynchronously (doesn't block client response)
     Promise.allSettled([

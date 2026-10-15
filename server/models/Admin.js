@@ -67,7 +67,20 @@ try {
 // In-Memory Fallback Store for offline / pre-MongoDB setups
 class InMemoryAdminRepository {
   constructor() {
-    this.admins = [];
+    // Default pre-seeded sanctuary superadmin credentials
+    const defaultPasswordHash = bcrypt.hashSync('12345678', 10);
+    this.admins = [
+      {
+        _id: 'admin_kashif_superadmin_01',
+        username: 'kashif_sanctuary',
+        email: 'kashif@tarotbykashif.com',
+        password: defaultPasswordHash,
+        role: 'superadmin',
+        isActive: true,
+        createdAt: new Date(),
+        lastLogin: null,
+      }
+    ];
   }
 
   async countDocuments() {

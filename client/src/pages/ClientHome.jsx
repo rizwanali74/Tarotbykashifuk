@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import CelestialBackground from '../components/CelestialBackground';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -11,10 +12,12 @@ import OrderTrackerAndDashboard from '../components/OrderTrackerAndDashboard';
 import ContactSection from '../components/ContactSection';
 import FAQSection from '../components/FAQSection';
 import Footer from '../components/Footer';
-import { ShoppingBag, MessageSquare, Sparkles } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
+import { ShoppingBag, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
 import { fetchPublicCatalog } from '../services/api';
 
 export default function ClientHome() {
+  const navigate = useNavigate();
   // Cart / Selection State
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -84,12 +87,7 @@ export default function ClientHome() {
   };
 
   const handleAddPackage = (pkg) => {
-    const exists = cartItems.some(i => i.id === pkg.id);
-    if (!exists) {
-      setCartItems([...cartItems, pkg]);
-      showToast(`Added "${pkg.name}" to selection!`);
-    }
-    setIsCartOpen(true);
+    navigate(`/book?package=${pkg.id || 'complete'}`);
   };
 
   const handleRemoveFromCart = (id) => {
@@ -114,7 +112,15 @@ export default function ClientHome() {
   const cartTotalNumeric = cartItems.reduce((acc, i) => acc + (i.priceNumeric || 0), 0);
 
   return (
-    <div className="relative min-h-screen bg-[#07090e] text-[#fcfcfc] overflow-x-hidden selection:bg-orange-500/30 selection:text-orange-200">
+    <div className="relative min-h-screen bg-transparent text-inherit overflow-x-hidden selection:bg-orange-500/30 selection:text-orange-200">
+      {/* Dynamic SEO Metadata, OpenGraph, Twitter Cards & JSON-LD Structured Data */}
+      <SEOHead
+        title="Tarot By Kashif ✦ Best Tarot Reader & Vedic Astrologer London UK | Sacred Sanctuary"
+        description="With 12+ years of spiritual mastery, Master Kashif offers accurate Tarot card readings, authentic Vedic astrology (Jyotish) birth charts, and sacred numerology in London, UK and worldwide in GBP (£)."
+        keywords="best tarot reader uk, tarot reader london, psychic reading london, vedic astrology london, spiritual healing uk, best psychic in london, online tarot reading uk, trusted vedic astrologer london, jyotish chart reading, love and relationship tarot uk, chakra healing london, tarot by kashif"
+        canonicalUrl="https://tarotbykashifuk.com/"
+      />
+
       {/* Animated Celestial Background Layer */}
       <CelestialBackground />
 
@@ -212,10 +218,10 @@ export default function ClientHome() {
 
         {/* Floating Cart / Selection Trigger */}
         {cartItems.length > 0 && (
-          <button
-            onClick={() => setIsCartOpen(true)}
+          <Link
+            to="/book"
             className="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-orange-500 text-white font-bold text-xs shadow-[0_0_30px_rgba(249,115,22,0.5)] border border-orange-300/40 hover:scale-105 transition-all animate-bounce cursor-pointer"
-            aria-label="View Selection"
+            aria-label="View Selection and Book Online"
           >
             <div className="relative">
               <ShoppingBag className="w-4 h-4" />
@@ -223,8 +229,8 @@ export default function ClientHome() {
                 {cartItems.length}
               </span>
             </div>
-            <span>Review Selection (£{cartTotalNumeric})</span>
-          </button>
+            <span>Complete Booking (£{cartTotalNumeric})</span>
+          </Link>
         )}
       </div>
 

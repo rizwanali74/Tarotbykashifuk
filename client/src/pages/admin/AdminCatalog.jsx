@@ -219,8 +219,8 @@ export default function AdminCatalog() {
     }
   };
 
-  const fieldClass = 'w-full rounded-lg border border-white/10 bg-[#070a12] px-3 py-2 text-sm text-white outline-none focus:border-orange-500';
-  const labelClass = 'block space-y-1.5 text-xs font-semibold text-slate-300';
+  const fieldClass = 'w-full rounded-lg border border-white/10 bg-[#070a12] px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500';
+  const labelClass = 'block space-y-1 text-[11px] font-semibold text-slate-300';
 
   return (
     <section className="space-y-5">
@@ -371,20 +371,20 @@ export default function AdminCatalog() {
           <div className="flex items-center justify-center gap-2 p-10 text-sm text-slate-400"><LoaderCircle className="h-4 w-4 animate-spin" /> Loading catalog</div>
         ) : (
           <table className="w-full min-w-[680px] text-left text-xs">
-            <thead className="border-b border-white/10 bg-[#0f1527] text-[11px] uppercase tracking-wide text-slate-400">
-              <tr><th className="p-3.5">Service</th><th className="p-3.5">Category</th><th className="p-3.5">Price</th><th className="p-3.5">Website</th><th className="p-3.5 text-right">Action</th></tr>
+            <thead className="border-b border-white/10 bg-[#0f1527] text-[10px] uppercase tracking-wider text-slate-400">
+              <tr><th className="py-2.5 px-3">Service</th><th className="py-2.5 px-3">Category</th><th className="py-2.5 px-3">Price</th><th className="py-2.5 px-3">Website</th><th className="py-2.5 px-3 text-right">Action</th></tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-slate-300">
               {catalog.services.map((service) => (
                 <tr key={service.id} className="hover:bg-white/[0.025]">
-                  <td className="p-3.5"><span className="font-semibold text-white">{service.name}</span><span className="mt-1 block max-w-sm truncate text-[11px] text-slate-500">{service.shortDescription}</span></td>
-                  <td className="p-3.5">{service.category}</td>
-                  <td className="p-3.5">{service.price}</td>
-                  <td className="p-3.5">{service.isActive ? <span className="text-emerald-300">Visible</span> : <span className="text-slate-500">Hidden</span>}</td>
-                  <td className="p-3.5 text-right"><div className="inline-flex gap-1.5"><button type="button" onClick={() => handleServiceEdit(service)} className="inline-flex items-center gap-1.5 rounded-md bg-[#161e36] px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-600"><Edit2 className="h-3.5 w-3.5" /> Edit</button><button type="button" title={`Delete ${service.name}`} aria-label={`Delete ${service.name}`} onClick={() => handleServiceDelete(service)} className="rounded-md bg-rose-950/40 p-1.5 text-rose-300 hover:bg-rose-900"><Trash2 className="h-4 w-4" /></button></div></td>
+                  <td className="py-2.5 px-3"><span className="font-semibold text-white text-xs">{service.name}</span><span className="mt-0.5 block max-w-sm truncate text-[10px] text-slate-400">{service.shortDescription}</span></td>
+                  <td className="py-2.5 px-3 text-xs">{service.category}</td>
+                  <td className="py-2.5 px-3 text-xs font-semibold text-white">{service.price}</td>
+                  <td className="py-2.5 px-3 text-xs">{service.isActive ? <span className="text-emerald-300 font-medium">Visible</span> : <span className="text-slate-500">Hidden</span>}</td>
+                  <td className="py-2.5 px-3 text-right"><div className="inline-flex gap-1"><button type="button" onClick={() => handleServiceEdit(service)} className="inline-flex items-center gap-1 rounded-md bg-[#161e36] px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-orange-600"><Edit2 className="h-3 w-3" /> Edit</button><button type="button" title={`Delete ${service.name}`} aria-label={`Delete ${service.name}`} onClick={() => handleServiceDelete(service)} className="rounded-md bg-rose-950/40 p-1 text-rose-300 hover:bg-rose-900"><Trash2 className="h-3.5 w-3.5" /></button></div></td>
                 </tr>
               ))}
-              {!catalog.services.length && <tr><td colSpan={5} className="p-8 text-center text-slate-400">No services yet.</td></tr>}
+              {!catalog.services.length && <tr><td colSpan={5} className="p-8 text-center text-slate-400 text-xs">No services yet.</td></tr>}
             </tbody>
           </table>
         )}

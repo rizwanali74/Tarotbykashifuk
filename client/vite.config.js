@@ -12,6 +12,17 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
     ],
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        'react-is',
+        'recharts',
+        'lucide-react',
+        'react-select',
+        'framer-motion',
+      ],
+    },
     server: {
       proxy: {
         '/api': {
