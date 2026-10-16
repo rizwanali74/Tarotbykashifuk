@@ -141,39 +141,3 @@ export const capturePayPalPayment = async (orderId, paypalOrderId) => {
   return await apiClient.post('/payments/capture-order', { orderId, paypalOrderId });
 };
 
-// 6. Time Slots & Multi-Country Availability Endpoints
-export const fetchTimeSlots = async ({ date, status, timezone } = {}) => {
-  const params = {};
-  if (date) params.date = date;
-  if (status) params.status = status;
-  if (timezone) params.timezone = timezone;
-  return await apiClient.get('/slots', { params });
-};
-
-export const createTimeSlot = async (slotData) => {
-  return await apiClient.post('/slots', slotData);
-};
-
-export const updateTimeSlot = async (id, slotData) => {
-  return await apiClient.put(`/slots/${id}`, slotData);
-};
-
-export const deleteTimeSlot = async (id) => {
-  return await apiClient.delete(`/slots/${id}`);
-};
-
-export const batchGenerateTimeSlots = async (payload) => {
-  return await apiClient.post('/slots/batch-generate', payload);
-};
-
-export const fetchAvailabilitySettings = async () => {
-  return await apiClient.get('/slots/availability');
-};
-
-export const updateAvailabilitySettings = async (settings) => {
-  return await apiClient.put('/slots/availability', settings);
-};
-
-export const autoGenerateWeeklySlots = async (payload = {}) => {
-  return await apiClient.post('/slots/auto-generate-weekly', payload);
-};

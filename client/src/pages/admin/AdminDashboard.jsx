@@ -11,7 +11,6 @@ import {
 } from '../../services/api';
 import CelestialBackground from '../../components/CelestialBackground';
 import AdminCatalog from './AdminCatalog';
-import AdminTimeSlots from './AdminTimeSlots';
 
 class ChartsErrorBoundary extends React.Component {
   constructor(props) {
@@ -136,7 +135,6 @@ export default function AdminDashboard() {
   const navigationItems = [
     { id: 'home', label: 'Home Dashboard', icon: LayoutDashboard },
     { id: 'orders', label: 'Bookings & Orders', count: orders.length, icon: ClipboardList },
-    { id: 'slots', label: 'Time Slots & Availability', icon: Clock },
     { id: 'messages', label: 'Client Inquiries', count: messages.length, icon: Mail },
     { id: 'catalog', label: 'Services & Categories', icon: Layers3 },
     { id: 'system', label: 'System & Email', icon: Settings2 },
@@ -226,7 +224,7 @@ export default function AdminDashboard() {
                 {activePage?.label || 'Admin Dashboard'}
               </h1>
               <p className="mt-0.5 text-[11px] text-[var(--theme-text-muted)]">
-                Manage bookings, client messages, time slots, and your public service catalog.
+                Manage bookings, client inquiries, and your public service catalog.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -369,11 +367,11 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Card 2: Services & Time Slot Details */}
+                {/* Card 2: Services & Pricing Details */}
                 <div className="rounded-2xl border border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] p-5 space-y-4 shadow-sm">
                   <div className="flex items-center gap-2 border-b border-[var(--theme-border-subtle)] pb-2.5">
                     <ClipboardList className="w-4 h-4 text-orange-500" />
-                    <h3 className="font-semibold text-[var(--theme-text-heading)] text-sm">Services & Schedule</h3>
+                    <h3 className="font-semibold text-[var(--theme-text-heading)] text-sm">Services & Pricing</h3>
                   </div>
 
                   <div className="space-y-3 text-xs text-[var(--theme-text-secondary)]">
@@ -394,23 +392,6 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                     </div>
-
-                    {selectedOrder.details?.selectedSlot && (
-                      <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-200 mt-2">
-                        <div className="font-semibold text-[var(--theme-text-heading)] flex items-center gap-1.5 text-xs">
-                          <Clock className="w-3.5 h-3.5 text-orange-500" />
-                          <span>Reserved Time Slot</span>
-                        </div>
-                        <div className="mt-1 font-mono text-[11px]">
-                          🇵🇰 PKT: {selectedOrder.details.selectedSlot.date} ({selectedOrder.details.selectedSlot.startTime} - {selectedOrder.details.selectedSlot.endTime})
-                        </div>
-                        {selectedOrder.details.selectedSlot.clientLocalTime && (
-                          <div className="text-[11px] text-sky-600 dark:text-sky-300 mt-0.5 font-medium">
-                            🌐 Client Local: {selectedOrder.details.selectedSlot.clientLocalTime}
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -497,7 +478,7 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="py-2.5 px-3">Ref ID</th>
                       <th className="py-2.5 px-3">Client</th>
-                      <th className="py-2.5 px-3">Services & Associated Slot</th>
+                      <th className="py-2.5 px-3">Selected Services</th>
                       <th className="py-2.5 px-3">Total</th>
                       <th className="py-2.5 px-3">Status</th>
                       <th className="py-2.5 px-3 text-right">Actions</th>
@@ -522,18 +503,6 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-2.5 px-3 max-w-[240px]">
                             <div className="truncate text-[var(--theme-text-heading)] font-medium text-xs">{ord.services?.join(', ') || 'Spiritual Session'}</div>
-                            {(ord.details?.selectedSlot || ord.details?.slotId || ord.slotId) && (
-                              <div className="text-[10px] text-orange-500 flex items-center gap-1 mt-0.5 font-medium">
-                                <Clock className="w-3 h-3 text-orange-500 shrink-0" />
-                                <span className="truncate">
-                                  {ord.details?.selectedSlot?.clientLocalTime 
-                                    ? ord.details.selectedSlot.clientLocalTime 
-                                    : ord.details?.selectedSlot 
-                                    ? `${ord.details.selectedSlot.date} (${ord.details.selectedSlot.startTime}-${ord.details.selectedSlot.endTime} PKT)` 
-                                    : `Slot #${ord.slotId || ord.details?.slotId}`}
-                                </span>
-                              </div>
-                            )}
                           </td>
                           <td className="py-2.5 px-3 font-cinzel font-bold text-[var(--theme-text-heading)] text-xs whitespace-nowrap">
                             {ord.total}
@@ -657,7 +626,6 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'catalog' && <AdminCatalog />}
-        {activeTab === 'slots' && <AdminTimeSlots />}
 
         </main>
       </div>

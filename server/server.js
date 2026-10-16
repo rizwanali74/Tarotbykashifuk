@@ -11,7 +11,6 @@ import orderRoutes from './routes/orderRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import catalogRoutes from './routes/catalogRoutes.js';
-import slotRoutes from './routes/slotRoutes.js';
 import { uploadDirectory } from './config/uploads.js';
 
 dotenv.config();
@@ -81,7 +80,6 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/catalog', catalogRoutes);
-app.use('/api/slots', slotRoutes);
 
 // 7. 404 Route Handler
 app.use((req, res) => {

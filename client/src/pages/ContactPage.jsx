@@ -60,7 +60,7 @@ export default function ContactPage() {
   const timezones = [
     { region: "United Kingdom & Europe", tz: "London GMT / BST", time: "Mon - Sun: 09:00 - 21:00" },
     { region: "Pakistan & South Asia", tz: "Islamabad / Karachi (PKT / UTC+5)", time: "Mon - Sun: 14:00 - 02:00" },
-    { region: "United States & Americas", tz: "New York (EST) & LA (PST)", time: "Morning & Evening Slots Available" },
+    { region: "United States & Americas", tz: "New York (EST) & LA (PST)", time: "Morning & Evening Sessions Available" },
     { region: "Gulf & Middle East", tz: "Dubai (GST / UTC+4)", time: "Mon - Sun: 13:00 - 01:00" }
   ];
 

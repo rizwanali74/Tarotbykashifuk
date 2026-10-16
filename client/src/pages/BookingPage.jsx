@@ -7,12 +7,12 @@ import MiniHero from '../components/MiniHero';
 import SEOHead from '../components/SEOHead';
 import { siteData } from '../data';
 import { 
-  fetchPublicCatalog, fetchTimeSlots, submitBookingOrder, 
+  fetchPublicCatalog, submitBookingOrder, 
   initiatePayPalPayment, capturePayPalPayment 
 } from '../services/api';
 import confetti from 'canvas-confetti';
 import { 
-  Sparkles, CheckCircle2, Clock, Globe, Shield, Calendar, 
+  Sparkles, CheckCircle2, Shield, 
   CreditCard, ArrowRight, ArrowLeft, User, Mail, Phone, 
   MapPin, Heart, Copy, Check, MessageSquare, AlertCircle, 
   HelpCircle, Trash2, Plus 
@@ -22,25 +22,13 @@ export default function BookingPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Progress Steps: 1: Service Selection, 2: Slot & Timezone, 3: Intake Form, 4: Confirmation
+  // Progress Steps: 1: Service Selection, 2: Sacred Intake, 3: Confirmation
   const [step, setStep] = useState(1);
 
   // Catalog & Selected Items
   const [catalog, setCatalog] = useState({ services: [], categories: [] });
   const [selectedItems, setSelectedItems] = useState([]);
   const [loadingCatalog, setLoadingCatalog] = useState(true);
-
-  // Timezone and Slots State
-  const [clientTimezone, setClientTimezone] = useState(() => {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London';
-    } catch {
-      return 'Europe/London';
-    }
-  });
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState(null);
 
   // Intake Form State
   const [formData, setFormData] = useState({
@@ -117,19 +105,6 @@ export default function BookingPage() {
     return () => { isMounted = false; };
   }, [searchParams]);
 
-  // 2. Fetch available slots whenever timezone changes
-  useEffect(() => {
-    setLoadingSlots(true);
-    fetchTimeSlots({ timezone: clientTimezone })
-      .then(res => {
-        if (res.success) {
-          setAvailableSlots(res.slots || []);
-        }
-      })
-      .catch(err => console.error("Error fetching slots in BookingPage:", err))
-      .finally(() => setLoadingSlots(false));
-  }, [clientTimezone]);
-
   // Total price calculation
   const totalNumeric = selectedItems.reduce((acc, i) => acc + (i.priceNumeric || 0), 0);
 
@@ -157,11 +132,6 @@ export default function BookingPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleProceedToStep3 = () => {
-    setStep(3);
-    window.scrollTo({ top: 300, behavior: 'smooth' });
-  };
-
   const handleSubmitBooking = async (e) => {
     e.preventDefault();
     if (!validateIntake()) return;
@@ -169,35 +139,18 @@ export default function BookingPage() {
     setIsSubmitting(true);
 
     try {
-      const slotIdentifier = selectedSlot ? (selectedSlot.slotId || selectedSlot._id) : null;
-      const slotSummary = selectedSlot ? {
-        slotId: slotIdentifier,
-        date: selectedSlot.date,
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime,
-        clientLocalTime: selectedSlot.conversion?.clientTimeRange,
-        clientCountry: selectedSlot.conversion?.targetTimezone,
-      } : null;
-
-      const servicesWithSlot = selectedItems.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        slotId: slotIdentifier,
-        slotInfo: slotSummary,
-      }));
-
       const payload = {
         clientName: formData.fullName,
         clientEmail: formData.email,
         whatsappNumber: formData.phone,
         service: selectedItems.map(i => i.name).join(' + '),
-        services: servicesWithSlot,
+        services: selectedItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+        })),
         serviceType: selectedItems[0]?.category || 'General Reading',
         totalPrice: totalNumeric,
-        selectedSlotId: slotIdentifier,
-        slotDetails: slotSummary,
-        clientTimezone: clientTimezone,
         birthDetails: {
           dob: formData.dob,
           birthTime: formData.unknownBirthTime ? 'Unknown' : formData.birthTime,
@@ -214,7 +167,7 @@ export default function BookingPage() {
 
       if (res.success) {
         setCreatedOrder(res.order);
-        setStep(4);
+        setStep(3);
         window.scrollTo({ top: 200, behavior: 'smooth' });
 
         // Trigger celebratory confetti
@@ -265,24 +218,12 @@ export default function BookingPage() {
     }
   };
 
-  const commonTimezones = [
-    { label: "UK / London (GMT / BST)", value: "Europe/London" },
-    { label: "US Eastern (New York / EDT)", value: "America/New_York" },
-    { label: "US Central (Chicago / CDT)", value: "America/Chicago" },
-    { label: "US Pacific (Los Angeles / PDT)", value: "America/Los_Angeles" },
-    { label: "Pakistan (Islamabad / PKT)", value: "Asia/Karachi" },
-    { label: "UAE / Dubai (GST)", value: "Asia/Dubai" },
-    { label: "India (New Delhi / IST)", value: "Asia/Kolkata" },
-    { label: "Australia (Sydney / AEST)", value: "Australia/Sydney" },
-    { label: "Canada (Toronto / EDT)", value: "America/Toronto" },
-  ];
-
   return (
     <div className="relative min-h-screen bg-transparent text-inherit overflow-x-hidden selection:bg-orange-500/30 selection:text-orange-200">
       <SEOHead
         title="Book Your Sacred Consultation | Tarot & Vedic Astrology Reading UK"
-        description="Reserve your private tarot card reading or Vedic astrological session with Master Kashif. Select your live time slot converted to your local timezone and receive deep guidance."
-        keywords="book tarot reading london, reserve vedic astrology session uk, psychic reading booking, tarot slot reservation, tarot by kashif booking"
+        description="Reserve your private tarot card reading or Vedic astrological session with Master Kashif. Share your life questions and birth details for authentic spiritual guidance."
+        keywords="book tarot reading london, reserve vedic astrology session uk, psychic reading booking, tarot by kashif booking"
         canonicalUrl="https://tarotbykashifuk.com/book"
       />
 
@@ -295,14 +236,14 @@ export default function BookingPage() {
         <MiniHero
           badge="✦ Sacred Reservation Sanctuary"
           title="Reserve Your Consultation With Master Kashif"
-          subtitle="Choose your consultation modality, select your slot converted automatically to your local time zone, and enter your intake inquiry."
+          subtitle="Choose your consultation modality, enter your sacred intake inquiry, and confirm your booking."
           breadcrumbs={[
             { label: "Home", to: "/" },
             { label: "Book Consultation", to: null }
           ]}
           highlights={[
             { icon: Shield, text: "100% Confidential & Sacred" },
-            { icon: Globe, text: "Automated Global Timezone Conversion" },
+            { icon: Sparkles, text: "Authentic Vedic Astrological Insight" },
             { icon: CreditCard, text: "Secure Payment via PayPal or Direct" }
           ]}
         />
@@ -312,12 +253,11 @@ export default function BookingPage() {
           
           {/* Progress Steps Indicator */}
           <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border-subtle)] shadow-md">
-            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+            <div className="grid grid-cols-3 gap-2 text-center text-xs">
               {[
                 { num: 1, title: "1. Selection" },
-                { num: 2, title: "2. Time Slot" },
-                { num: 3, title: "3. Sacred Intake" },
-                { num: 4, title: "4. Confirmation" },
+                { num: 2, title: "2. Sacred Intake" },
+                { num: 3, title: "3. Confirmation" },
               ].map((s) => (
                 <div
                   key={s.num}
@@ -341,7 +281,7 @@ export default function BookingPage() {
             <div className="space-y-6 text-left animate-in fade-in duration-300">
               <div className="p-6 sm:p-8 rounded-3xl bg-[var(--theme-bg-card)] border border-orange-500/20 shadow-xl space-y-6">
                 <div>
-                  <span className="text-[10px] font-bold tracking-widest text-orange-500 uppercase">Step 1 of 4</span>
+                  <span className="text-[10px] font-bold tracking-widest text-orange-500 uppercase">Step 1 of 3</span>
                   <h2 className="font-cinzel text-xl sm:text-2xl font-bold text-[var(--theme-text-heading)] mt-0.5">
                     Review Your Selected Consultations
                   </h2>
@@ -420,127 +360,6 @@ export default function BookingPage() {
                     }}
                     className="px-8 py-3.5 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-orange-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-2 transition-transform hover:scale-105 cursor-pointer"
                   >
-                    <span>Proceed to Slot Selection</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: TIMEZONE & TIME SLOT SELECTION */}
-          {step === 2 && (
-            <div className="space-y-6 text-left animate-in fade-in duration-300">
-              <div className="p-6 sm:p-8 rounded-3xl bg-[var(--theme-bg-card)] border border-orange-500/20 shadow-xl space-y-6">
-                <div>
-                  <span className="text-[10px] font-bold tracking-widest text-orange-500 uppercase">Step 2 of 4</span>
-                  <h2 className="font-cinzel text-xl sm:text-2xl font-bold text-[var(--theme-text-heading)] mt-0.5">
-                    Select Your Consultation Time Slot
-                  </h2>
-                  <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
-                    Slots operate in Master Kashif's master schedule (PKT) and are automatically converted below into your local time zone.
-                  </p>
-                </div>
-
-                {/* Client Timezone Switcher */}
-                <div className="p-4 rounded-2xl bg-[var(--theme-bg-card-subtle)] border border-[var(--theme-border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-heading)]">
-                    <Globe className="w-4 h-4 text-orange-400" />
-                    <span>Your Detected Local Time Zone:</span>
-                  </div>
-
-                  <select
-                    value={clientTimezone}
-                    onChange={(e) => setClientTimezone(e.target.value)}
-                    className="px-3 py-2 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs font-medium outline-none focus:border-orange-500 cursor-pointer"
-                  >
-                    {commonTimezones.map(tz => (
-                      <option key={tz.value} value={tz.value}>{tz.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Slots List / Grid */}
-                <div className="space-y-3">
-                  <div className="text-xs font-bold text-[var(--theme-text-heading)] uppercase tracking-wider">
-                    Available Live Slots:
-                  </div>
-
-                  {loadingSlots ? (
-                    <div className="p-8 text-center text-xs text-[var(--theme-text-muted)] animate-pulse">
-                      Calculating time zone conversions and loading available slots...
-                    </div>
-                  ) : availableSlots.length === 0 ? (
-                    <div className="p-6 rounded-2xl bg-[var(--theme-bg-card-subtle)] border border-[var(--theme-border-subtle)] text-center space-y-3">
-                      <p className="text-xs text-[var(--theme-text-secondary)]">
-                        No pre-set online slots currently active for this specific date range.
-                      </p>
-                      <p className="text-xs text-orange-400 font-medium">
-                        You can still proceed! Master Kashif will coordinate a custom session time directly with you upon receiving your booking intake.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                      {availableSlots.map((slot) => {
-                        const isSelected = selectedSlot?.slotId === slot.slotId || selectedSlot?._id === slot._id;
-                        const isBooked = slot.status === 'booked';
-                        const isBlocked = slot.status === 'blocked';
-                        const disabled = isBooked || isBlocked;
-
-                        return (
-                          <button
-                            key={slot._id || slot.slotId}
-                            type="button"
-                            disabled={disabled}
-                            onClick={() => setSelectedSlot(slot)}
-                            className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                              disabled
-                                ? 'opacity-40 cursor-not-allowed border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card-subtle)]'
-                                : isSelected
-                                ? 'bg-orange-500/15 border-orange-500 shadow-md ring-2 ring-orange-500/30'
-                                : 'bg-[var(--theme-bg-card-subtle)] border-[var(--theme-border-subtle)] hover:border-orange-500/40'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between text-xs font-bold text-[var(--theme-text-heading)]">
-                              <span>{slot.conversion?.clientDate || slot.date}</span>
-                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                                isBooked ? 'bg-rose-500/15 text-rose-400' : 'bg-emerald-500/15 text-emerald-400'
-                              }`}>
-                                {slot.status}
-                              </span>
-                            </div>
-
-                            <div className="mt-2 text-xs font-bold text-orange-400 flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5" />
-                              <span>{slot.conversion?.clientTimeRange || `${slot.startTime} - ${slot.endTime}`}</span>
-                            </div>
-
-                            <div className="text-[10px] text-[var(--theme-text-muted)] font-mono mt-1">
-                              Master PKT: {slot.startTime} - {slot.endTime} (UTC+5)
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Back & Next Navigation */}
-                <div className="pt-4 border-t border-[var(--theme-border-subtle)] flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="px-5 py-2.5 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card-subtle)] hover:bg-[var(--theme-bg-card-hover)] flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Back to Selection</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleProceedToStep3}
-                    className="px-8 py-3.5 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-orange-500 hover:from-orange-500 hover:to-amber-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-2 transition-transform hover:scale-105 cursor-pointer"
-                  >
                     <span>Proceed to Sacred Intake</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
@@ -549,193 +368,177 @@ export default function BookingPage() {
             </div>
           )}
 
-          {/* STEP 3: SACRED INTAKE FORM */}
-          {step === 3 && (
+          {/* STEP 2: SACRED INTAKE FORM */}
+          {step === 2 && (
             <div className="space-y-6 text-left animate-in fade-in duration-300">
               <form onSubmit={handleSubmitBooking} className="p-6 sm:p-8 rounded-3xl bg-[var(--theme-bg-card)] border border-orange-500/20 shadow-xl space-y-6">
                 <div>
-                  <span className="text-[10px] font-bold tracking-widest text-orange-500 uppercase">Step 3 of 4</span>
+                  <span className="text-[10px] font-bold tracking-widest text-orange-500 uppercase">Step 2 of 3</span>
                   <h2 className="font-cinzel text-xl sm:text-2xl font-bold text-[var(--theme-text-heading)] mt-0.5">
                     Sacred Intake & Astrological Details
                   </h2>
                   <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
-                    Your details remain strictly confidential and are used exclusively to cast your Vedic Kundli and consecrate your Tarot reading.
+                    Your details are held in strictest confidence and used purely to cast accurate astrological calculations and consecrated tarot spreads.
                   </p>
                 </div>
 
-                {/* Personal Information */}
+                {/* Full Name & Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
-                      Full Name *
+                      Full Name <span className="text-orange-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
+                      placeholder="e.g. Eleanor Vance"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="e.g. Eleanor Vance"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500 transition-colors"
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none"
                     />
-                    {errors.fullName && <p className="text-rose-400 text-[10px] mt-1">{errors.fullName}</p>}
+                    {errors.fullName && <p className="text-[11px] text-rose-400 mt-1">{errors.fullName}</p>}
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
-                      Email Address *
+                      Email Address <span className="text-orange-500">*</span>
                     </label>
                     <input
                       type="email"
                       required
+                      placeholder="eleanor@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="eleanor@example.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500 transition-colors"
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none"
                     />
-                    {errors.email && <p className="text-rose-400 text-[10px] mt-1">{errors.email}</p>}
+                    {errors.email && <p className="text-[11px] text-rose-400 mt-1">{errors.email}</p>}
                   </div>
                 </div>
 
+                {/* WhatsApp & Birth Date */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
-                      WhatsApp / Phone Number *
+                      WhatsApp / Phone Number <span className="text-orange-500">*</span>
                     </label>
                     <input
                       type="tel"
                       required
+                      placeholder="+44 7400 123456"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+44 7400 000000"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500 transition-colors"
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none"
                     />
-                    {errors.phone && <p className="text-rose-400 text-[10px] mt-1">{errors.phone}</p>}
+                    {errors.phone && <p className="text-[11px] text-rose-400 mt-1">{errors.phone}</p>}
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
-                      Relationship Status
+                      Date of Birth <span className="text-orange-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={formData.dob}
+                      onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none"
+                    />
+                    {errors.dob && <p className="text-[11px] text-rose-400 mt-1">{errors.dob}</p>}
+                  </div>
+                </div>
+
+                {/* Birth Time & Place */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
+                      Time of Birth (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      disabled={formData.unknownBirthTime}
+                      placeholder="e.g. 04:30 AM"
+                      value={formData.birthTime}
+                      onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none disabled:opacity-40"
+                    />
+                    <label className="flex items-center gap-1.5 mt-1 text-[11px] text-[var(--theme-text-muted)] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.unknownBirthTime}
+                        onChange={(e) => setFormData({ ...formData, unknownBirthTime: e.target.checked, birthTime: e.target.checked ? 'Unknown' : '' })}
+                        className="accent-orange-500 rounded"
+                      />
+                      <span>Birth time approximate or unknown</span>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
+                      City & Country of Birth
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. London, United Kingdom"
+                      value={formData.birthPlace}
+                      onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Mother's Name & Relationship Status */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
+                      Mother's First Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Traditional Astrological reference"
+                      value={formData.motherName}
+                      onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
+                      Current Relationship Status
                     </label>
                     <select
                       value={formData.relationshipStatus}
                       onChange={(e) => setFormData({ ...formData, relationshipStatus: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500 cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none cursor-pointer"
                     >
-                      <option value="Single">Single</option>
-                      <option value="In a Relationship">In a Relationship</option>
-                      <option value="Married">Married</option>
-                      <option value="Separated / Divorced">Separated / Divorced</option>
-                      <option value="Complicated / In Transition">Complicated / In Transition</option>
+                      <option>Single / Seeking Direction</option>
+                      <option>In a Relationship</option>
+                      <option>Complicated / Distance</option>
+                      <option>Married / Cohabitating</option>
+                      <option>Separated / Breakup</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Birth Coordinates for Vedic Chart */}
-                <div className="p-4 rounded-2xl bg-[var(--theme-bg-card-subtle)] border border-[var(--theme-border-subtle)] space-y-4">
-                  <div className="text-xs font-bold text-orange-400 uppercase tracking-wider">
-                    Astronomical Birth Data (For Natal Chart Calculation)
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1">
-                        Date of Birth *
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        value={formData.dob}
-                        onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                        className="w-full px-3.5 py-2 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500 cursor-pointer"
-                      />
-                      {errors.dob && <p className="text-rose-400 text-[10px] mt-1">{errors.dob}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1">
-                        Exact Birth Time
-                      </label>
-                      <input
-                        type="time"
-                        disabled={formData.unknownBirthTime}
-                        value={formData.birthTime}
-                        onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
-                        className="w-full px-3.5 py-2 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500 disabled:opacity-50"
-                      />
-                      <label className="flex items-center gap-1.5 mt-1.5 text-[10px] text-[var(--theme-text-muted)] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.unknownBirthTime}
-                          onChange={(e) => setFormData({ ...formData, unknownBirthTime: e.target.checked })}
-                          className="rounded text-orange-500"
-                        />
-                        <span>Birth time unknown</span>
-                      </label>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1">
-                        Birth Place (City & Country)
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.birthPlace}
-                        onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
-                        placeholder="e.g. London, UK"
-                        className="w-full px-3.5 py-2 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1">
-                        Mother's First Name (Traditional Vedic Spiritual Anchor)
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.motherName}
-                        onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
-                        placeholder="e.g. Mary"
-                        className="w-full px-3.5 py-2 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1">
-                        Current City / Location
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.currentLocation}
-                        onChange={(e) => setFormData({ ...formData, currentLocation: e.target.value })}
-                        placeholder="e.g. Manchester, UK"
-                        className="w-full px-3.5 py-2 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Core Questions / Themes */}
+                {/* Core Questions */}
                 <div>
                   <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
-                    Your Core Questions & Themes of Exploration *
+                    Your Questions / Life Situation to Explore <span className="text-orange-500">*</span>
                   </label>
                   <textarea
                     rows={4}
                     required
+                    placeholder="Share what matters most right now (e.g. relationship dilemmas, career crossroads, spiritual blockages)..."
                     value={formData.questions}
                     onChange={(e) => setFormData({ ...formData, questions: e.target.value })}
-                    placeholder="Share the background of your situation, names of relevant people involved, or specific questions you wish the cards and chart to illuminate..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] text-[var(--theme-text-heading)] text-xs outline-none focus:border-orange-500 transition-colors resize-none"
+                    className="w-full p-4 bg-[var(--theme-bg-input)] border border-[var(--theme-border-default)] rounded-xl text-xs sm:text-sm text-[var(--theme-text-heading)] focus:border-orange-500 outline-none resize-none"
                   />
-                  {errors.questions && <p className="text-rose-400 text-[10px] mt-1">{errors.questions}</p>}
+                  {errors.questions && <p className="text-[11px] text-rose-400 mt-1">{errors.questions}</p>}
                 </div>
 
-                {/* Payment Preference */}
-                <div className="p-4 rounded-2xl bg-[var(--theme-bg-card-subtle)] border border-[var(--theme-border-subtle)] space-y-2">
-                  <label className="block text-xs font-bold text-[var(--theme-text-heading)] uppercase tracking-wider">
-                    Preferred Settlement Method:
+                {/* Payment Method Preference */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-[var(--theme-text-secondary)]">
+                    Payment Settlement Method
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label className={`p-3 rounded-xl border flex items-center gap-2.5 cursor-pointer text-xs font-semibold transition-all ${
@@ -772,11 +575,11 @@ export default function BookingPage() {
                 <div className="pt-4 border-t border-[var(--theme-border-subtle)] flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={() => setStep(2)}
+                    onClick={() => setStep(1)}
                     className="px-5 py-2.5 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card-subtle)] hover:bg-[var(--theme-bg-card-hover)] flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    <span>Back to Slot Picker</span>
+                    <span>Back to Selection</span>
                   </button>
 
                   <button
@@ -792,8 +595,8 @@ export default function BookingPage() {
             </div>
           )}
 
-          {/* STEP 4: ORDER CONFIRMATION & RECEIPT */}
-          {step === 4 && createdOrder && (
+          {/* STEP 3: ORDER CONFIRMATION & RECEIPT */}
+          {step === 3 && createdOrder && (
             <div className="space-y-6 text-left animate-in fade-in duration-300">
               <div className="p-8 sm:p-12 rounded-3xl bg-[var(--theme-bg-card)] border-2 border-orange-500/40 shadow-2xl space-y-8 text-center">
                 

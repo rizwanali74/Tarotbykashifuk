@@ -54,8 +54,8 @@ export default function ServicesPage() {
     },
     {
       step: "02",
-      title: "Reserve Your Slot",
-      desc: "Choose a convenient session time converted automatically to your exact local time zone."
+      title: "Sacred Intake & Questions",
+      desc: "Share your birth details and core questions so Master Kashif can align his sacred preparation."
     },
     {
       step: "03",

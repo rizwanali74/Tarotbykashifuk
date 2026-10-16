@@ -14,7 +14,7 @@
 
 ## 🌌 Overview
 
-**Tarot by Kashif** is an end-to-end full-stack web application designed for spiritual consultation bookings, offering intuitive catalog browsing, interactive time-slot scheduling, instant consultation checkout, order status tracking, and a comprehensive superadmin sanctuary dashboard.
+**Tarot by Kashif** is an end-to-end full-stack web application designed for spiritual consultation bookings, offering intuitive catalog browsing, streamlined intake booking, instant consultation checkout, order status tracking, and a comprehensive superadmin sanctuary dashboard.
 
 The application incorporates a **responsive scroll-reactive mystical background animation system** that dynamically transitions visual atmospheres across 6 distinct scenes (Cosmic Beginning, Tarot Energy, Celestial Alignment, Moonlight & Reflection, Golden Energy, and Cosmic Return) for both **Dark Sanctuary** and **Radiant Light** modes.
 
@@ -31,14 +31,14 @@ The application incorporates a **responsive scroll-reactive mystical background 
 ### 📜 Client Experience & Booking
 - **Dedicated & Anchor Routing**: Seamless multi-page experience (`/`, `/services`, `/packages`, `/about`, `/contact`, `/book`, `/order`) with mini hero headers and direct anchor links.
 - **Consultation Selection & Cart Drawer**: Multi-service selection, package selection, and slide-out intake booking drawer with real-time price calculations in GBP (£).
-- **Order Tracker & Client Dashboard**: Self-service tracking modal allowing clients to view booking status, scheduled slots, and practitioner notes via their Booking ID.
+- **Order Tracker & Client Dashboard**: Self-service tracking modal allowing clients to view booking status, intake progress, and practitioner notes via their Booking ID.
 - **Direct WhatsApp Consultation Action**: Quick-action floating button for direct practitioner contact.
 - **Dynamic SEO Engine**: Integrated `SEOHead` component injecting dynamic OpenGraph metadata, Twitter Cards, canonical links, and JSON-LD structured schema for search engines.
 
 ### 🛡️ Admin Sanctuary Dashboard
 - **Protected Superadmin Portal**: Secure JWT authentication and session management.
 - **Catalog Management**: Add, update, archive, and categorize spiritual services and pricing packages.
-- **Interactive Time Slot Scheduler**: Filter, assign, and populate time slots associated with specific consultation categories and services with daily slot filtering.
+- **Order & Client Inquiry Management**: Process consultation bookings, update session status, and view astrological questions.
 - **Analytics & Revenue Reporting**: Visual revenue trends and booking breakdown charts built with Recharts.
 
 ---
@@ -99,7 +99,7 @@ Tarotbykashifuk/
 │   ├── config/                  # Database, storage, and upload configurations
 │   ├── controllers/             # Request handlers
 │   ├── middleware/              # Auth, validation, rate limiting
-│   ├── models/                  # Mongoose data schemas (Order, Service, TimeSlot, Admin)
+│   ├── models/                  # Mongoose data schemas (Order, Service, Category, Admin)
 │   ├── routes/                  # Express API route definitions
 │   ├── scripts/                 # Database seed scripts
 │   └── server.js                # API entrypoint & middleware setup
@@ -180,7 +180,7 @@ npm run build
 To access the administrator sanctuary:
 1. Navigate to `http://localhost:5173/admin/login`
 2. If initial setup is required, visit `http://localhost:5173/admin/setup` to configure the primary superadmin account.
-3. Manage catalog offerings, intake orders, and time slots from `/admin/dashboard`.
+3. Manage catalog offerings, intake orders, and client inquiries from `/admin/dashboard`.
 
 ---
 

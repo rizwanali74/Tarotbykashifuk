@@ -163,8 +163,8 @@ export default function OrderTrackerAndDashboard({
                         done: trackedOrder.status !== 'Pending Review' 
                       },
                       { 
-                        label: '3. PayPal & Time', 
-                        desc: 'Time slot confirmed with client', 
+                        label: '3. Consultation Details', 
+                        desc: 'Intake and schedule confirmed with client', 
                         done: trackedOrder.status === 'Session Scheduled' || trackedOrder.status === 'Completed' 
                       },
                       { 

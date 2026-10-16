@@ -7,8 +7,7 @@ import {
   Globe
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { siteData } from '../data';
-import { submitBookingOrder, initiatePayPalPayment, capturePayPalPayment, fetchTimeSlots } from '../services/api';
+import { submitBookingOrder, initiatePayPalPayment, capturePayPalPayment } from '../services/api';
 
 export default function BookingDrawer({ 
   isOpen, 
@@ -24,18 +23,6 @@ export default function BookingDrawer({
   const [createdOrder, setCreatedOrder] = useState(null);
   const [paypalLoading, setPaypalLoading] = useState(false);
   const [paypalSuccess, setPaypalSuccess] = useState(false);
-
-  // Timezone and Slots State
-  const [clientTimezone, setClientTimezone] = useState(() => {
-    try {
-      return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London';
-    } catch {
-      return 'Europe/London';
-    }
-  });
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -76,19 +63,7 @@ export default function BookingDrawer({
     setStep(2);
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      setLoadingSlots(true);
-      fetchTimeSlots({ timezone: clientTimezone })
-        .then(res => {
-          if (res.success) {
-            setAvailableSlots(res.slots || []);
-          }
-        })
-        .catch(err => console.error('Failed to load slots in drawer:', err))
-        .finally(() => setLoadingSlots(false));
-    }
-  }, [isOpen, clientTimezone]);
+
 
   const handleSubmitBooking = async (e) => {
     e.preventDefault();
@@ -97,38 +72,15 @@ export default function BookingDrawer({
     setIsSubmitting(true);
 
     try {
-      const slotIdentifier = selectedSlot ? (selectedSlot.slotId || selectedSlot._id) : null;
-      const slotSummary = selectedSlot ? {
-        slotId: slotIdentifier,
-        date: selectedSlot.date,
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime,
-        clientLocalTime: selectedSlot.conversion?.clientTimeRange,
-        clientCountry: selectedSlot.conversion?.targetTimezone,
-      } : null;
-
-      // Associate selected slot with each service
-      const servicesWithSlot = cartItems.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        slotId: slotIdentifier,
-        slotInfo: slotSummary,
-      }));
-
       const payload = {
         clientName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         services: cartItems.map(i => i.name),
-        slotId: slotIdentifier,
         total: hasCaseBased && subtotal === 0 ? 'Case Quote' : `£${subtotal}`,
         totalNumeric: subtotal,
         details: { 
           ...formData,
-          slotId: slotIdentifier,
-          selectedSlot: slotSummary,
-          servicesWithSlot: servicesWithSlot,
         }
       };
 
@@ -185,14 +137,11 @@ export default function BookingDrawer({
 
   const generateWhatsAppMessage = () => {
     if (!createdOrder) return '';
-    const slotInfo = selectedSlot 
-      ? `\n*Preferred Reading Slot:* ${selectedSlot.conversion?.clientTimeRange || `${selectedSlot.startTime} - ${selectedSlot.endTime}`} (PKT: ${selectedSlot.date} ${selectedSlot.startTime} - ${selectedSlot.endTime})` 
-      : '';
     const text = `Hello Kashif, I have submitted a booking request on your website.
 *Order Reference:* ${createdOrder.id || createdOrder.orderId}
 *Name:* ${formData.fullName}
 *Selected Services:* ${createdOrder.services.join(', ')}
-*Total:* ${createdOrder.total}${slotInfo}
+*Total:* ${createdOrder.total}
 *Date of Birth:* ${formData.dob} ${formData.unknownBirthTime ? '(Birth time unknown)' : `at ${formData.birthTime}`}
 *Birthplace:* ${formData.birthPlace || 'Not specified'}
 *Mother's Name:* ${formData.motherName || 'Not specified'}
@@ -205,14 +154,11 @@ Please let me know how to proceed with PayPal payment and scheduling. Thank you!
 
   const handleCopySummary = () => {
     if (!createdOrder) return;
-    const slotSummary = selectedSlot 
-      ? `\nSelected Slot: ${selectedSlot.conversion?.clientTimeRange || ''} (PKT: ${selectedSlot.date} ${selectedSlot.startTime} - ${selectedSlot.endTime})` 
-      : '';
     const summary = `TAROT BY KASHIF - BOOKING REQUEST
 Order Reference: ${createdOrder.id || createdOrder.orderId}
 Client: ${formData.fullName} (${formData.email}, ${formData.phone})
 Services: ${createdOrder.services.join(', ')}
-Amount: ${createdOrder.total}${slotSummary}
+Amount: ${createdOrder.total}
 DOB: ${formData.dob}
 Questions: ${formData.questions}`;
 
@@ -337,36 +283,7 @@ Questions: ${formData.questions}`;
                       ))}
                     </div>
 
-                    {/* Slot Attachment Indicator in Step 1 */}
-                    {selectedSlot ? (
-                      <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs flex items-center justify-between text-orange-200">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-orange-400 shrink-0" />
-                          <div>
-                            <div className="font-semibold text-white">Assigned Reading Slot:</div>
-                            <div className="text-[11px] text-orange-300">
-                              {selectedSlot.conversion?.clientTimeRange} ({selectedSlot.conversion?.clientDate})
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setStep(2)}
-                          className="text-[11px] text-orange-400 hover:text-orange-300 underline cursor-pointer"
-                        >
-                          Change
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setStep(2)}
-                        className="w-full py-2.5 px-3 rounded-xl border border-dashed border-orange-500/30 hover:border-orange-500 bg-orange-500/5 hover:bg-orange-500/10 text-xs text-orange-300 flex items-center justify-center gap-2 transition-all cursor-pointer"
-                      >
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>Select Available Time Slot for this Service ➔</span>
-                      </button>
-                    )}
+
 
                     {/* Summary Calculation */}
                     <div className="pt-4 p-4 rounded-xl bg-[#0c101c] border border-orange-500/20 space-y-2">
@@ -568,109 +485,7 @@ Questions: ${formData.questions}`;
                   </div>
                 </div>
 
-                {/* Select Available Reading Slot (Converted to your local time) */}
-                <div className="p-3.5 rounded-xl bg-[#090d18] border border-orange-500/25 space-y-2.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-                      <Clock className="w-4 h-4 text-orange-400" />
-                      <span>Select Time Slot for {cartItems[0]?.name || 'Your Service'}</span>
-                    </div>
-                    {/* Country/Timezone Selector */}
-                    <div className="flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-slate-400" />
-                      <select
-                        value={clientTimezone}
-                        onChange={(e) => setClientTimezone(e.target.value)}
-                        className="bg-[#0c101c] border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white focus:border-orange-500 outline-none cursor-pointer"
-                      >
-                        <option value="Europe/London">🇬🇧 United Kingdom (London)</option>
-                        <option value="America/New_York">🇺🇸 USA Eastern (New York)</option>
-                        <option value="America/Los_Angeles">🇺🇸 USA Pacific (Los Angeles)</option>
-                        <option value="Asia/Dubai">🇦🇪 UAE / Gulf (Dubai)</option>
-                        <option value="Europe/Paris">🇪🇺 Europe (Paris / Berlin)</option>
-                        <option value="America/Toronto">🇨🇦 Canada (Toronto)</option>
-                        <option value="Australia/Sydney">🇦🇺 Australia (Sydney)</option>
-                        <option value="Asia/Karachi">🇵🇰 Pakistan (PKT)</option>
-                        <option value="Asia/Kolkata">🇮🇳 India (IST)</option>
-                        <option value="Asia/Riyadh">🇸🇦 Saudi Arabia (Riyadh)</option>
-                      </select>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Slots auto-converted to your country time from Kashif's master schedule (PKT).</span>
-                    <span className="text-[10px] text-slate-500">🔒 Reserved slots are disabled</span>
-                  </div>
-
-                  {loadingSlots ? (
-                    <div className="p-4 text-center text-xs text-slate-400">
-                      Loading schedule from sanctuary database...
-                    </div>
-                  ) : availableSlots.length === 0 ? (
-                    <div className="p-3 rounded-lg bg-[#07090e] border border-white/5 text-[11px] text-slate-400 text-center">
-                      No open slots on schedule right now. You can proceed with booking and Kashif will confirm an appointment with you directly.
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                      {availableSlots.map((slot) => {
-                        const isReserved = slot.status === 'booked' || slot.status === 'blocked';
-                        const isSelected = selectedSlot?._id === slot._id || selectedSlot?.slotId === slot.slotId;
-                        return (
-                          <button
-                            key={slot._id || slot.slotId}
-                            type="button"
-                            disabled={isReserved}
-                            onClick={() => !isReserved && setSelectedSlot(isSelected ? null : slot)}
-                            className={`p-2.5 rounded-xl border text-left transition-all ${
-                              isReserved
-                                ? 'opacity-40 cursor-not-allowed bg-black/50 border-white/5 text-slate-500'
-                                : isSelected 
-                                ? 'bg-orange-500/20 border-orange-500 text-white ring-1 ring-orange-500 shadow-md cursor-pointer' 
-                                : 'bg-[#0c101c] border-white/10 text-slate-300 hover:border-orange-500/40 hover:bg-[#111728] cursor-pointer'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between text-xs font-bold">
-                              <span className={isReserved ? 'text-slate-500 line-through' : 'text-white'}>
-                                {slot.conversion?.clientTimeRange || `${slot.startTime} - ${slot.endTime}`}
-                              </span>
-                              {isReserved ? (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                  🔒 Reserved
-                                </span>
-                              ) : isSelected ? (
-                                <span className="text-orange-400 font-bold text-[10px]">✓ Selected</span>
-                              ) : (
-                                <span className="text-emerald-400 text-[10px] font-medium">Available</span>
-                              )}
-                            </div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">
-                              {slot.conversion?.clientDate || slot.date}
-                            </div>
-                            <div className="text-[9px] text-slate-500 mt-0.5">
-                              🇵🇰 PKT Ref: {slot.startTime} - {slot.endTime} {isReserved ? '(Unavailable)' : ''}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {selectedSlot && (
-                    <div className="flex items-center justify-between text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-lg">
-                      <div className="flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Slot Reserved for <strong>{cartItems[0]?.name || 'Reading'}</strong>: {selectedSlot.conversion?.clientTimeRange} ({selectedSlot.conversion?.clientDate})</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSlot(null)}
-                        className="text-[10px] text-rose-300 hover:underline cursor-pointer ml-2 shrink-0"
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  )}
-                </div>
 
                 {/* Questions / Matters to explore */}
                 <div>
@@ -729,12 +544,6 @@ Questions: ${formData.questions}`;
                     <div><span className="text-slate-400">Services:</span> {createdOrder.services.join(', ')}</div>
                     <div><span className="text-slate-400">Amount:</span> <strong className="text-gradient-orange">{createdOrder.total}</strong></div>
                     <div><span className="text-slate-400">Status:</span> <span className="text-amber-400 font-semibold">{createdOrder.status}</span></div>
-                    {selectedSlot && (
-                      <div className="pt-1 text-xs text-orange-300 flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-orange-400" />
-                        <span>Slot: {selectedSlot.conversion?.clientTimeRange} ({selectedSlot.conversion?.clientDate})</span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
